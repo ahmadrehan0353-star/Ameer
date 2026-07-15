@@ -212,6 +212,7 @@ function wirePDP(images) {
     ? ""
     : (state.size || "One Size"),
   state.qty
+   );
   };
 
   // wishlist
