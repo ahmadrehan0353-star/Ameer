@@ -3,12 +3,12 @@
 // ============================================================
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyDC-7lbGC4JR5B58AKzQB15iQ3vSsEtLjE",
-  authDomain: "luxora-ac413.firebaseapp.com",
-  projectId: "luxora-ac413",
-  storageBucket: "luxora-ac413.firebasestorage.app",
-  messagingSenderId: "23264579888",
-  appId: "1:23264579888:web:71d15bf590544fc5a138f5"
+  apiKey: "AIzaSyCQzzGylhvtGjUnT6aDgwrZHhILZHE3TAg",
+  authDomain: "ameer-f77cb.firebaseapp.com",
+  projectId: "ameer-f77cb",
+  storageBucket: "ameer-f77cb.firebasestorage.app",
+  messagingSenderId: "753356791626",
+  appId: "1:753356791626:web:178f9976a94dfd1b1eabb3"
 };
 
 // The email addresses allowed into the admin dashboard.
