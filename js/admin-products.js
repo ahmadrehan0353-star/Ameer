@@ -192,10 +192,24 @@ function openEditor(p) {
     if (!name) { toast("Colour needs a name", "err"); return; }
     workColors.push({ name, hex }); document.getElementById("newColorName").value = ""; renderColors();
   };
-  document.getElementById("addSize").onclick = () => {
-    const s = document.getElementById("newSize").value.trim();
-    if (s && !workSizes.includes(s)) { workSizes.push(s); document.getElementById("newSize").value = ""; renderSizes(); }
-  };
+ document.getElementById("addSize").onclick = () => {
+  const s = document.getElementById("newSize").value.trim();
+
+  if (!s) return;
+
+  if (s === "Unstitched") {
+    workSizes = ["Unstitched"];
+  } else {
+    workSizes = workSizes.filter(x => x !== "Unstitched");
+
+    if (!workSizes.includes(s)) {
+      workSizes.push(s);
+    }
+  }
+
+  document.getElementById("newSize").value = "";
+  renderSizes();
+};
   document.getElementById("imgDrop").onclick = () => document.getElementById("imgFile").click();
   document.getElementById("imgFile").onchange = onFiles;
   document.getElementById("addUrl").onclick = () => {
@@ -213,11 +227,23 @@ function openEditor(p) {
       document.getElementById("newColorHex").value = hex;
     }
   });
-  wireCombo({
-    arrowId: "sizeArrow", panelId: "sizePanel",
-    buildPanel: () => sizePanelHTML(),
-    onPick: (el) => { document.getElementById("newSize").value = el.dataset.name; }
-  });
+ wireCombo({
+  arrowId: "sizeArrow",
+  panelId: "sizePanel",
+  buildPanel: () => sizePanelHTML(),
+  onPick: (el) => {
+    const size = el.dataset.name;
+
+    if (size === "Unstitched") {
+      workSizes = ["Unstitched"];
+      renderSizes();
+      document.getElementById("newSize").value = "";
+      return;
+    }
+
+    document.getElementById("newSize").value = size;
+  }
+});
 }
 
 /* ---------- preset colour / size picker (dropdown combobox) ---------- */
