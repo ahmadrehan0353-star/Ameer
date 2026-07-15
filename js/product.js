@@ -33,7 +33,12 @@ async function boot() {
   }
 
   state.color = (product.colors && product.colors[0] && product.colors[0].name) || null;
-  state.size = (product.sizes && product.sizes[Math.floor(product.sizes.length / 2)]) || null;
+  state.size =
+  (product.sizes &&
+   product.sizes.length &&
+   !product.sizes.includes("Unstitched"))
+    ? product.sizes[Math.floor(product.sizes.length / 2)]
+    : null;
 
   document.title = `${product.name} — AMEER OFFICIAL`;
   renderPDP();
@@ -90,7 +95,9 @@ function renderPDP() {
           </div>
         </div>` : ""}
 
-        ${product.sizes && product.sizes.length ? `
+      ${product.sizes &&
+product.sizes.length &&
+!product.sizes.includes("Unstitched") ? `
         <div class="pdp-opt">
           <div class="opt-label">Size <b id="sizeLabel">${esc(state.size)}</b></div>
           <div class="p-swatches" id="sizePicks" style="gap:10px">
@@ -198,7 +205,13 @@ function wirePDP(images) {
 
   // add to cart
   document.getElementById("addToCartBtn").onclick = () => {
-    addToCart(product, state.color || "Default", state.size || "One Size", state.qty);
+ addToCart(
+  product,
+  state.color || "Default",
+  product.sizes && product.sizes.includes("Unstitched")
+    ? ""
+    : (state.size || "One Size"),
+  state.qty
   };
 
   // wishlist
