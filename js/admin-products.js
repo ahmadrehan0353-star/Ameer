@@ -232,6 +232,7 @@ const PRESET_COLORS = [
   { name: "Emerald", hex: "#12503a" }, { name: "Rose Pink", hex: "#e8b4bc" }
 ];
 const PRESET_SIZES = {
+  "Unstitched": ["Unstitched"],
   "Clothing": ["XS","S","M","L","XL","XXL"],
   "Waist / numeric": ["28","30","32","34","36","38","40","42"],
   "Kids (age)": ["0-3m","3-6m","6-12m","1-2y","2-3y","3-4y","4-5y","5-6y","6-7y","7-8y"]
