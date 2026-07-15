@@ -23,8 +23,8 @@ export const ADMIN_EMAIL = ADMIN_EMAILS[0];
 
 // Cloudinary (free image hosting for admin uploads — set up later).
 export const CLOUDINARY = {
-  cloudName: "PASTE_YOUR_CLOUD_NAME",
-  uploadPreset: "PASTE_YOUR_UNSIGNED_PRESET"
+  cloudName: "aoqipkgm",
+  uploadPreset: "gnlhqwmp"
 };
 
 // EmailJS (free, sends email straight from the browser — no backend
