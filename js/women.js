@@ -1,3 +1,5 @@
+import { initCatalog } from "./catalog.js";
+
 initCatalog(
   "Women",
   null,
