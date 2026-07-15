@@ -334,7 +334,7 @@ async function save() {
     rating: parseFloat(document.getElementById("e-rating").value) || 4.6,
     desc: document.getElementById("e-desc").value.trim(),
     colors: workColors.length ? workColors : [{ name: "Black", hex: "#111111" }],
-    sizes: workSizes.length ? workSizes : ["S", "M", "L"],
+    sizes: [...workSizes],
     images: workImages.length ? workImages : undefined,
     image: workImages[0] || editing?.image,
     featured: document.getElementById("e-featured").checked,
