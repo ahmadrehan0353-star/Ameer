@@ -142,7 +142,7 @@ function paymentStep() {
           <div style="flex:1"><div class="pay-name">${m.name}</div><div class="pay-desc">${m.desc}</div></div>
         </label>`).join("")}
     </div>
-    <p class="muted" style="font-size:.82rem;margin-top:14px">💵 Pay in cash when your order is delivered. Please keep the exact amount ready.</p>
+    <p class="muted" style="font-size:.82rem;margin-top:14px">This step is very critical.</p>
     <div style="display:flex;gap:12px;margin-top:24px">
       <button class="btn btn-line" id="backTo2">Back</button>
       <button class="btn btn-primary" id="toReview" style="flex:1">Review order</button>
