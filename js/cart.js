@@ -8,7 +8,7 @@ import { money, esc, lsGet, lsSet, toast, optimizeImg } from "./utils.js";
 
 const SHIP_FREE_OVER = 5000;
 const SHIP_FLAT = 200;
-const TAX_RATE = 0.08;
+const TAX_RATE = 0.00;
 
 // coupons available (admin will manage these in Firestore later)
 const COUPONS = {
