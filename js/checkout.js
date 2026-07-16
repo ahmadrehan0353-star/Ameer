@@ -131,7 +131,7 @@ function shippingStep() {
 /* ---- step 3: payment ---- */
 function paymentStep() {
   const methods = [
-    { k: "cod", name: "Cash on delivery", desc: "Pay in cash when your order arrives at your door" }
+    { k: "cod", name: "BANK TRANSFER", desc: "Pay on our Easypaisa account# 03365062794 and Share receipt on Whatsapp 03365062794: As soon as we get the payment your order will be dispatched" }
   ];
   return `<div class="co-section">
     <h3>Payment</h3>
