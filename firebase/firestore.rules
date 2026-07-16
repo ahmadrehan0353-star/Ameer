@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- helpers ----
+    // Two ways to be an admin:
+    // 1) Primary admins — hardcoded here, keep in sync with ADMIN_EMAILS
+    //    in firebase-config.js.
+    // 2) Team admins — invited from the Team page in /admin, stored in the
+    //    `admins` collection below with status "active".
+    function isPrimaryAdmin() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'ahmadrehan0353@gmail.com'
+          // add more primary admins here, e.g.:
+          // , 'teammate@gmail.com'
+        ];
+    }
+    function isTeamAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.token.email))
+        && get(/databases/$(database)/documents/admins/$(request.auth.token.email)).data.status == 'active';
+    }
+    function isAdmin() { return isPrimaryAdmin() || isTeamAdmin(); }
+    function signedIn() { return request.auth != null; }
+    function isStr(v, maxLen) { return v is string && v.size() > 0 && v.size() <= maxLen; }
+
+    // ---- ADMINS: the invited-teammate list. Only existing admins can
+    // view or manage it (add, verify, remove teammates from the Team page). ----
+    match /admins/{email} {
+      allow read:  if isAdmin();
+      allow write: if isPrimaryAdmin();   // only owners add/remove admins
+    }
+
+    // ---- PRODUCTS: public read, admin write ----
+    match /products/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---- CATEGORIES & BANNERS: public read, admin write ----
+    match /categories/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /brands/{id}     { allow read: if true; allow write: if isAdmin(); }
+    match /qualities/{id}  { allow read: if true; allow write: if isAdmin(); }
+    match /banners/{id}    { allow read: if true; allow write: if isAdmin(); }
+
+    // ---- COUPONS: public read (checkout validates), admin write ----
+    match /coupons/{id} { allow read: if true; allow write: if isAdmin(); }
+
+    // ---- SETTINGS: store name/contact/shipping/tax — public read (storefront footer needs it), admin write ----
+    match /settings/{id} { allow read: if true; allow write: if isAdmin(); }
+
+    // ---- USERS: a person reads/writes only their own profile; admin reads all ----
+    match /users/{uid} {
+      allow read:   if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create: if signedIn() && request.auth.uid == uid
+                    && isStr(request.resource.data.email, 200);
+      allow update: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow delete: if isAdmin();
+    }
+
+    // ---- ORDERS: customer creates & reads own; admin manages all ----
+    match /orders/{id} {
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.totals.total is number;
+      allow read:   if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // ---- REVIEWS: signed-in users submit (pending); public reads approved; admin moderates ----
+    match /reviews/{id} {
+      allow create: if signedIn()
+                    && request.resource.data.status == 'pending'
+                    && isStr(request.resource.data.text, 2000)
+                    && isStr(request.resource.data.name, 120)
+                    && request.resource.data.rating is int
+                    && request.resource.data.rating >= 1
+                    && request.resource.data.rating <= 5;
+      allow read:   if resource.data.status == 'approved' || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+  }
+}
