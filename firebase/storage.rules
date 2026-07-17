@@ -1,0 +1,37 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Keep this list in sync with ADMIN_EMAILS in firebase-config.js and the
+    // isPrimaryAdmin() list in firestore.rules. Storage rules can't read
+    // Firestore, so invited team admins are NOT covered here — owners only.
+    //
+    // email_verified matters for the same reason it does in firestore.rules:
+    // an email/password signup doesn't prove the address is yours, so without
+    // it anyone could claim an admin address that hasn't registered yet.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'ahmadrehan0353@gmail.com'
+        ];
+    }
+    // Product & banner images: public read, admin-only write, images only, max 5MB.
+    // (Uploads currently go to Cloudinary — this is here for the day they don't.)
+    match /products/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+    match /banners/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+    // Nothing else in the bucket is reachable from a browser.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
