@@ -34,9 +34,9 @@ async function boot() {
   await Promise.all([loadProducts(), loadBanners()]);
   buildHero();
   await categoryStripDone;
-  renderGrid("gridNew", (await newArrivals()).slice(0, 8));
-  renderGrid("gridTrending", (await trending()).slice(0, 4));
-  renderGrid("gridBest", (await bestsellers()).slice(0, 4));
+  renderGrid("gridNew", (await newArrivals()).slice(0, 20));
+  renderGrid("gridTrending", (await trending()).slice(0, 16));
+  renderGrid("gridBest", (await bestsellers()).slice(0, 16));
   initProductCarousels();
   buildInstagram();
   initReveal();
