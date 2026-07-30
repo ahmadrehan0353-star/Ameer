@@ -282,7 +282,7 @@ function showConfirmation() {
         ? `<p class="ord-note"><b>Save this number.</b> You ordered as a guest, so it's the only way to track your order.</p>`
         : `<p class="ord-note">You can also see this order in your profile.</p>`}
 
-      ${info.total != null ? `<p>Total to pay on delivery: <b>${money(info.total)}</b></p>` : ""}
+      ${info.total != null ? `<p>Total to pay on Easy paisa number 03335665882 and Whatsapp receipt on 03335665882: <b>${money(info.total)}</b></p>` : ""}
       <a class="btn btn-primary" href="track.html?id=${encodeURIComponent(info.id || "")}">Track my order</a>
       <a class="btn btn-line" href="women.html" style="margin-top:10px">Continue shopping</a>
     </div>`;
