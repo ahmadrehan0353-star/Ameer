@@ -11,7 +11,7 @@ export function renderFooter() {
     <div class="wrap ft-top">
       <div class="ft-col ft-brand">
         <div class="ft-logo">
-          <span class="brandmark on-dark">
+          <span class="brandmark">
             <span class="brandmark-top">AMEER</span>
             <span class="brandmark-line"></span>
             <span class="brandmark-bottom">OFFICIAL</span>
@@ -24,13 +24,17 @@ export function renderFooter() {
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg><span>54/4 Bank Road, Saddar, Rawalpindi</span></li>
         </ul>
         <div class="ft-social">
-          <a href="https://www.instagram.com/ameer.sofficial?igsh=MTVoZnhqcDZvY2o3dQ==" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none"/></svg></a>
+          <a href="https://www.instagram.com/ameer.sofficial?igsh=MTVoZnhqcDZvY2o3dQ==" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
           <a href="https://www.facebook.com/share/191aSYHgqm/?mibextid=wwXIfr" aria-label="Facebook" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M15 8h-2a2 2 0 0 0-2 2v10M8 12h6"/></svg></a>
           <a href="https://www.tiktok.com/@ameersofficialstore?_r=1&_t=ZS-985Vt7gJ1F6" aria-label="TikTok" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0 4 4V4c1 2 2.5 3 5 3"/></svg></a>
         </div>
       </div>
       <div class="ft-col">
         <h4>Shop</h4>
+        <a href="women.html">Women</a>
+        <a href="men.html">Men</a>
+        <a href="collection.html?flag=new">New In</a>
+        <a href="collection.html?flag=sale">Sale</a>
       </div>
       <div class="ft-col">
         <h4>Company</h4>
@@ -65,7 +69,7 @@ export function renderFooter() {
     e.preventDefault();
     const v = nf.querySelector("input").value;
     if (!isEmail(v)) { toast("Enter a valid email", "err"); return; }
-    nf.reset(); toast("Welcome to the AMEER OFFICIAL List ✦", "ok");
+    nf.reset(); toast("Welcome to the AMEER OFFICIAL List", "ok");
   });
 
   applyStoreSettings();
@@ -113,13 +117,9 @@ async function applyStoreSettings() {
 
 // scroll reveal (shared)
 export function initReveal() {
-  const els = document.querySelectorAll(".reveal, .p-grid");
-  if (els.length) {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-    }, { threshold: 0.08 });
-    els.forEach((el) => io.observe(el));
-  }
+  // Sections used to stay invisible until this observer fired. They now show
+  // immediately; the class is still added so older styles keep working.
+  document.querySelectorAll(".reveal, .p-grid").forEach((el) => el.classList.add("in"));
   // navbar shadow on scroll — a subtle premium lift
   const nav = document.querySelector("header.nav");
   if (nav) {

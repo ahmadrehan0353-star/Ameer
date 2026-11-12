@@ -12,14 +12,14 @@ const OPTIONS = [
   {
     label: "Stitched",
     desc: "Ready to wear — pick your size and go.",
-    icon: "🧵",
-    grad: "linear-gradient(135deg,#1c1c1c 0%,#3a3a3a 100%)",
+    icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3l4 3 4-3 5 4-3 4-2-1v10H8V10l-2 1-3-4 5-4Z"/></svg>',
+    tint: "var(--peach)",
   },
   {
     label: "Unstitched",
     desc: "Premium fabric, stitched your way.",
-    icon: "🪡",
-    grad: "linear-gradient(135deg,#6b5436 0%,#a9843c 100%)",
+    icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="3"/><circle cx="6" cy="17" r="3"/><path d="M8.5 8.5L21 18M8.5 15.5L21 6"/></svg>',
+    tint: "var(--brand-soft)",
   },
 ];
 
@@ -38,17 +38,18 @@ function injectStyles() {
   const s = document.createElement("style");
   s.id = "stitchChooserCSS";
   s.textContent = `
-    #stitchChooser{max-width:1200px;margin:26px auto 0;padding:0 24px}
-    #stitchChooser .sc-head{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#777;margin:0 0 10px}
+    #stitchChooser{max-width:var(--wrap);margin:24px auto 0;padding:0 24px}
+    #stitchChooser .sc-head{font-size:.9rem;font-weight:800;color:var(--ink);margin:0 0 10px}
     #stitchChooser .sc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    @media(max-width:560px){#stitchChooser .sc-grid{grid-template-columns:1fr}}
-    #stitchChooser .sc-card{position:relative;display:flex;align-items:center;gap:16px;padding:22px 20px;border-radius:14px;color:#fff;text-decoration:none;overflow:hidden;border:2px solid transparent;transition:transform .18s,box-shadow .18s}
-    #stitchChooser .sc-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.18)}
-    #stitchChooser .sc-card .sc-icon{font-size:1.9rem;line-height:1}
-    #stitchChooser .sc-card b{display:block;font-size:1.15rem;letter-spacing:.02em}
-    #stitchChooser .sc-card small{display:block;opacity:.85;font-size:.8rem;margin-top:3px}
-    #stitchChooser .sc-card.on{border-color:#fff;box-shadow:0 0 0 3px rgba(0,0,0,.25)}
-    #stitchChooser .sc-card .sc-badge{position:absolute;top:10px;right:12px;background:#fff;color:#111;font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:3px 9px}
+    @media(max-width:600px){#stitchChooser{padding:0 16px}#stitchChooser .sc-grid{grid-template-columns:1fr;gap:10px}}
+    #stitchChooser .sc-card{position:relative;display:flex;align-items:center;gap:16px;padding:20px 22px;border-radius:var(--radius);color:var(--ink);text-decoration:none;border:2px solid transparent;transition:transform .15s,box-shadow .15s}
+    #stitchChooser .sc-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+    #stitchChooser .sc-card .sc-icon{flex:none;width:48px;height:48px;border-radius:50%;background:var(--surface);display:grid;place-items:center}
+    #stitchChooser .sc-card .sc-icon svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
+    #stitchChooser .sc-card b{display:block;font-size:1.1rem;font-weight:800}
+    #stitchChooser .sc-card small{display:block;color:var(--ink-soft);font-size:.86rem;margin-top:2px}
+    #stitchChooser .sc-card.on{border-color:var(--ink)}
+    #stitchChooser .sc-card .sc-badge{margin-left:auto;background:var(--ink);color:var(--bg);font-size:.72rem;font-weight:700;border-radius:999px;padding:5px 11px;white-space:nowrap}
   `;
   document.head.appendChild(s);
 }
@@ -66,7 +67,7 @@ function render() {
         const on = cur === o.label;
         // clicking the active card clears the filter (link back without ?cat=)
         const href = on ? pageBase() : `${pageBase()}?cat=${encodeURIComponent(o.label)}`;
-        return `<a class="sc-card ${on ? "on" : ""}" href="${href}" style="background:${o.grad}" aria-pressed="${on}">
+        return `<a class="sc-card ${on ? "on" : ""}" href="${href}" style="background:${o.tint}" aria-pressed="${on}">
           <span class="sc-icon">${o.icon}</span>
           <span><b>${o.label}</b><small>${o.desc}</small></span>
           ${on ? `<span class="sc-badge">Showing · tap to clear</span>` : ""}

@@ -27,12 +27,14 @@ const state = {
 const FLAG_FILTERS = {
   trending: (p) => !!p.trending,
   best: (p) => !!p.bestseller,
-  new: (p) => !!p.isNew
+  new: (p) => !!p.isNew,
+  sale: (p) => !!p.salePrice
 };
 const FLAG_LABELS = {
   trending: ["Trending Now", "Our most-loved pieces right now — Women, Men and Kids, all in one place."],
   best: ["Best Sellers", "The pieces our customers keep coming back for, across the whole store."],
-  new: ["New Arrivals", "Fresh in across Women, Men and Kids."]
+  new: ["New Arrivals", "Fresh in across Women, Men and Kids."],
+  sale: ["Sale", "Everything currently marked down, across the whole store."]
 };
 
 export async function initCatalog(category, heroImg, heroTitle, heroText) {

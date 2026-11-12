@@ -10,12 +10,24 @@ export function renderNavbar(active = "") {
   initTheme();
   const mount = document.getElementById("navbar");
   if (!mount) return;
+  // which chip is "on": the page's own section, refined by ?cat= / ?flag=
+  const qs = new URLSearchParams(location.search);
+  const cat = qs.get("cat") || "";
+  const flag = (qs.get("flag") || "").toLowerCase();
+  const on = (k) => {
+    const is =
+      k === "new" ? (flag === "new" || active === "new") :
+      k === "sale" ? flag === "sale" :
+      k === "Unstitched" || k === "Stitched" ? (active === "women" && cat === k) :
+      (active === k && !cat && !flag);
+    return is ? "active" : "";
+  };
   mount.innerHTML = `
-  <div class="topbar">Free shipping over Rs 10000 · Members get early access</div>
+  <div class="topbar">Free shipping over Rs 10,000 · Members get early access</div>
   <header class="nav">
     <div class="wrap nav-inner">
       <button class="ic-btn nav-burger" aria-label="Menu" id="burger">
-        <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <a class="nav-logo" href="index.html" aria-label="AMEER OFFICIAL — home">
         <span class="brandmark">
@@ -24,48 +36,51 @@ export function renderNavbar(active = "") {
           <span class="brandmark-bottom">OFFICIAL</span>
         </span>
       </a>
-      <nav class="nav-menu">
-        <a href="women.html" class="${active==='women'?'active':''}">Women</a>
-        <a href="men.html" class="${active==='men'?'active':''}">Men</a>
-        <a href="index.html#new" class="${active==='new'?'active':''}">New In</a>
-        <a href="index.html#sale">Sale</a>
-        <a href="track.html" class="${active==='track'?'active':''}">Track Order</a>
-      </nav>
+      <div class="nav-search" role="search">
+        <input type="search" id="navSearch" placeholder="Search suits, lawn, collections…" aria-label="Search AMEER OFFICIAL" autocomplete="off">
+        <button class="ic-btn" id="navSearchBtn" aria-label="Search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        </button>
+        <div class="ac-panel" id="acPanel"></div>
+      </div>
       <div class="nav-actions">
-        <div class="nav-search">
-          <input type="search" id="navSearch" placeholder="Search AMEER OFFICIAL…" aria-label="Search" autocomplete="off">
-          <button class="ic-btn" id="navSearchBtn" aria-label="Search" style="width:32px;height:32px">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-          </button>
-          <div class="ac-panel" id="acPanel"></div>
-        </div>
-        <button class="ic-btn" id="themeBtn" aria-label="Toggle theme">
-          <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        <button class="ic-btn" id="themeBtn" aria-label="Toggle dark mode">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
         </button>
         <a class="ic-btn" href="wishlist.html" aria-label="Wishlist">
-          <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.6-9.2-8.8C1.2 8 3 4.8 6.4 4.8c2 0 3.6 1.1 4.4 2.6h2.4c.8-1.5 2.4-2.6 4.4-2.6 3.4 0 5.2 3.2 3.6 6.4C19 15.4 12 20 12 20Z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.6-9.2-8.8C1.2 8 3 4.8 6.4 4.8c2.4 0 4.2 1.6 5.6 3.4 1.4-1.8 3.2-3.4 5.6-3.4 3.4 0 5.2 3.2 3.6 6.4C19 15.4 12 20 12 20Z"/></svg>
           <span class="ic-count" id="wishCount" style="display:none">0</span>
         </a>
-        <a class="ic-btn" href="cart.html" aria-label="Cart">
-          <svg viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
-          <span class="ic-count" id="cartCount" style="display:none">0</span>
-        </a>
         <a class="nav-account" href="profile.html" id="navAccount" aria-label="Account">
-          <span class="ic-btn" style="width:auto;padding:0 4px">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+          <span class="ic-btn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
           </span>
           <span class="nav-account-text" id="navAccountText">Sign in / Sign up</span>
+        </a>
+        <a class="ic-btn ic-bag" href="cart.html" aria-label="Bag">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+          <span class="ic-count" id="cartCount" style="display:none">0</span>
         </a>
       </div>
     </div>
   </header>
+  <nav class="wrap nav-menu" aria-label="Shop">
+    <a href="women.html" class="${on("women")}">Women</a>
+    <a href="men.html" class="${on("men")}">Men</a>
+    <a href="women.html?cat=Unstitched" class="${on("Unstitched")}">Unstitched</a>
+    <a href="women.html?cat=Stitched" class="${on("Stitched")}">Stitched</a>
+    <a href="collection.html?flag=new" class="${on("new")}">New In</a>
+    <a href="collection.html?flag=sale" class="chip-sale ${on("sale")}">Sale</a>
+    <a href="track.html" class="${on("track")}">Track Order</a>
+  </nav>
   <div class="m-drawer" id="mDrawer">
-    <button class="m-close" id="mClose" aria-label="Close">×</button>
+    <button class="m-close" id="mClose" aria-label="Close menu">×</button>
     <a href="women.html">Women</a>
     <a href="men.html">Men</a>
-    <a href="index.html#new">New In</a>
-    <a href="index.html#sale">Sale</a>
+    <a href="collection.html?flag=new">New In</a>
+    <a href="collection.html?flag=sale">Sale</a>
     <a href="track.html">Track Order</a>
+    <a href="wishlist.html">Wishlist</a>
     <a href="profile.html">My Account</a>
   </div>`;
 
@@ -124,7 +139,7 @@ function wireSearch() {
     } else {
       panel.innerHTML = items.slice(0, 6).map((p) => `
         <a class="ac-item" href="product.html?id=${esc(p.id)}">
-          <img src="${esc(optimizeImg(p.image || placeholder(p.id), 150))}" alt="">
+          <img src="${esc(optimizeImg(p.image || placeholder(p.id), 150))}" data-raw="${esc(p.image || "")}" alt="" loading="lazy">
           <div><b>${esc(p.name)}</b><br><small>${esc(p.category || "")} · ${money(p.price)}</small></div>
         </a>`).join("");
     }

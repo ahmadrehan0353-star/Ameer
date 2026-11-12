@@ -94,10 +94,10 @@ function renderPDP() {
     <div class="pdp">
       <div class="gallery">
         <div class="gal-main" id="galMain">
-          <img id="galMainImg" src="${esc(optimizeImg(images[state.img], 1000))}" data-raw="${esc(images[state.img])}" alt="${esc(product.name)}" onerror="if(this.src!==this.dataset.raw){this.src=this.dataset.raw}">
+          <img id="galMainImg" src="${esc(optimizeImg(images[state.img], 1000))}" data-raw="${esc(images[state.img])}" alt="${esc(product.name)}">
         </div>
         ${images.length > 1 ? `<div class="gal-thumbs" id="galThumbs">
-          ${images.map((src, i) => `<button class="${i === state.img ? "on" : ""}" data-i="${i}"><img src="${esc(optimizeImg(src, 150))}" data-raw="${esc(src)}" alt="" onerror="if(this.src!==this.dataset.raw){this.src=this.dataset.raw}"></button>`).join("")}
+          ${images.map((src, i) => `<button class="${i === state.img ? "on" : ""}" data-i="${i}"><img src="${esc(optimizeImg(src, 150))}" data-raw="${esc(src)}" alt=""></button>`).join("")}
         </div>` : ""}
       </div>
       <div class="pdp-info">

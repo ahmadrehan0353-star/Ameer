@@ -85,6 +85,30 @@ export function lazyImg(src, alt = "") {
 // resized/compressed instead of shipped at full original size — this falls
 // straight back to the original URL if fetch delivery isn't enabled on the
 // Cloudinary account yet, since callers wire an <img onerror> fallback.
+const LOCAL_PHOTO = /^(?:\.\.\/|\/)?assets\/images\/[^?#]+\.(?:jpe?g|png)$/i;
+const VARIANT = /\.w\d+\.webp$/i;
+
+// One safety net for every product photo on the site: if an optimized copy
+// fails to load, show the original instead — once. (The old inline handlers
+// compared an absolute URL with a relative one, so a truly missing photo was
+// re-requested forever.) If the original fails too, the image is hidden and
+// the tinted frame behind it shows through.
+if (typeof document !== "undefined" && !window.__lxImgGuard) {
+  window.__lxImgGuard = true;
+  document.addEventListener("error", (e) => {
+    const img = e.target;
+    if (!img || img.tagName !== "IMG") return;
+    const current = img.getAttribute("src") || "";
+    const raw = img.dataset.raw || (VARIANT.test(current) ? current.replace(VARIANT, "") : "");
+    if (raw && !img.dataset.fellBack) {
+      img.dataset.fellBack = "1";
+      img.src = raw;
+    } else if (img.dataset.raw || img.dataset.fellBack) {
+      img.style.visibility = "hidden";
+    }
+  }, true);
+}
+
 export function optimizeImg(url, width = 700) {
   if (!url || typeof url !== "string") return url;
 
@@ -104,6 +128,15 @@ export function optimizeImg(url, width = 700) {
       if (!u.searchParams.get("q")) u.searchParams.set("q", "80");
       return u.toString();
     } catch { return url; }
+  }
+
+  // Photos that live in this repo (assets/images/...) have small WebP copies
+  // next to them, made by tools/make-image-variants.py. Cards and thumbnails
+  // get the 500px copy, the product page the 1000px one. If a copy is missing
+  // the global handler below swaps the original file back in.
+  if (LOCAL_PHOTO.test(url)) {
+    const tier = width <= 600 ? 500 : width <= 1000 ? 1000 : 1600;
+    return `${url}.w${tier}.webp`;
   }
 
   const cloud = CLOUDINARY?.cloudName;

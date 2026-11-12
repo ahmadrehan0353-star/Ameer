@@ -1,16 +1,16 @@
-/* ============================================================ LUXORA — cart, wishlist & checkout ============================================================ */
-.page-head{padding:36px 0 8px}
+/* ============================================================ AMEER OFFICIAL — cart, wishlist & checkout ============================================================ */
+.page-head{padding-top:32px;padding-bottom:8px}
 .page-head h1{font-size:clamp(1.8rem,4vw,2.8rem)}
 .page-head p{color:var(--ink-soft);margin-top:6px}
 
 /* cart layout */
-.cart-layout{display:grid;grid-template-columns:1fr 380px;gap:40px;padding:24px 0 80px;align-items:start}
+.cart-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:40px;padding:24px 0 80px;align-items:start}
 @media(max-width:900px){.cart-layout{grid-template-columns:1fr;gap:24px}}
 
 .cart-line{display:grid;grid-template-columns:104px 1fr auto;gap:18px;padding:20px 0;border-bottom:1px solid var(--line)}
-.cart-line .cimg{border-radius:12px;overflow:hidden;aspect-ratio:4/5;background:var(--raise)}
+.cart-line .cimg{border-radius:16px;overflow:hidden;aspect-ratio:4/5;background:var(--raise)}
 .cart-line .cimg img{width:100%;height:100%;object-fit:cover}
-.cart-line .cname{font-family:var(--serif);font-size:1.1rem;margin-bottom:4px}
+.cart-line .cname{font-size:1.05rem;font-weight:700;margin-bottom:4px}
 .cart-line .cmeta{font-size:.82rem;color:var(--ink-soft);margin-bottom:12px}
 .cart-line .cline-price{font-weight:600;text-align:right;white-space:nowrap}
 .cart-line .cline-price .was{display:block;font-weight:400;font-size:.82rem;color:var(--ink-soft);text-decoration:line-through}
@@ -27,8 +27,8 @@
 .sum-row.muted{color:var(--ink-soft)}
 .sum-total{display:flex;justify-content:space-between;padding:16px 0 4px;margin-top:8px;border-top:1px solid var(--line-strong);font-weight:700;font-size:1.15rem}
 .coupon{display:flex;gap:8px;margin:16px 0}
-.coupon input{flex:1;border:1.5px solid var(--line-strong);border-radius:10px;padding:11px 13px;background:var(--surface);color:var(--ink);font-size:.88rem}
-.coupon button{border:1.5px solid var(--ink);border-radius:10px;padding:0 18px;font-weight:600;font-size:.85rem}
+.coupon input{flex:1;min-width:0;border:1.5px solid var(--line-strong);border-radius:999px;padding:11px 16px;background:var(--surface);color:var(--ink);font-size:.88rem}
+.coupon button{border:1.5px solid var(--ink);border-radius:999px;padding:0 20px;font-weight:600;font-size:.85rem}
 .coupon button:hover{background:var(--ink);color:var(--bg)}
 .coupon-ok{font-size:.82rem;color:var(--ok);margin-bottom:10px;font-weight:500}
 .summary .btn{margin-top:18px}
@@ -40,10 +40,10 @@
 .cart-empty-state .btn{margin-top:20px}
 
 /* checkout */
-.checkout{display:grid;grid-template-columns:1fr 400px;gap:44px;padding:24px 0 80px;align-items:start}
+.checkout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:44px;padding:24px 0 80px;align-items:start}
 @media(max-width:900px){.checkout{grid-template-columns:1fr}}
 .steps{display:flex;gap:8px;margin-bottom:30px}
-.step{flex:1;text-align:center;font-size:.8rem;font-weight:600;color:var(--ink-soft);padding-bottom:10px;border-bottom:2px solid var(--line)}
+.step{flex:1;text-align:center;font-size:.86rem;font-weight:700;color:var(--ink-soft);padding-bottom:10px;border-bottom:2px solid var(--line)}
 .step.on{color:var(--ink);border-color:var(--gold)}
 .step.done{color:var(--ok);border-color:var(--ok)}
 .co-section{margin-bottom:30px}
@@ -51,8 +51,8 @@
 .form-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:520px){.form-2{grid-template-columns:1fr}}
 .pay-methods{display:flex;flex-direction:column;gap:10px}
-.pay-opt{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line-strong);border-radius:12px;padding:14px 16px;cursor:pointer;transition:border-color .15s}
-.pay-opt.on{border-color:var(--gold);background:var(--raise)}
+.pay-opt{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line-strong);border-radius:16px;padding:14px 16px;cursor:pointer;transition:border-color .15s}
+.pay-opt.on{border-color:var(--accent);background:var(--brand-soft)}
 .pay-opt input{accent-color:var(--gold)}
 .pay-opt .pay-name{font-weight:600;font-size:.92rem}
 .pay-opt .pay-desc{font-size:.8rem;color:var(--ink-soft)}
@@ -76,3 +76,5 @@
 .link-btn{background:none;border:none;padding:8px 0 0;font-size:.8rem;font-weight:600;color:var(--ink-soft);text-decoration:underline;cursor:pointer}
 .link-btn:hover{color:var(--ink)}
 .link-btn:disabled{color:var(--line-strong);cursor:not-allowed;text-decoration:none}
+.co-review-item{gap:16px}
+.co-review-item>*:last-child{white-space:nowrap}

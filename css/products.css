@@ -1,31 +1,33 @@
-/* ============================================================ LUXORA — catalog (PLP) + product detail (PDP) ============================================================ */
+/* ============================================================ AMEER OFFICIAL — catalog (PLP) + product detail (PDP) ============================================================ */
 
 /* ---- category hero ---- */
-.cat-hero{position:relative;height:400px;overflow:hidden;display:grid;place-items:center;background:var(--raise)}
+.cat-hero{position:relative;height:340px;overflow:hidden;display:grid;place-items:center;background:var(--raise);
+  max-width:calc(var(--wrap) - 48px);margin:8px auto 0;border-radius:var(--radius-lg)}
 .cat-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 8%}
-.cat-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.22) 0%,rgba(0,0,0,.15) 42%,rgba(0,0,0,.62) 100%)}
-.cat-hero .inner{position:relative;z-index:2;text-align:center;color:#fff;align-self:end;padding-bottom:38px;text-shadow:0 2px 18px rgba(0,0,0,.5)}
-.cat-hero h1{font-size:clamp(2.2rem,5vw,3.6rem);color:#fff;margin-bottom:8px}
-.cat-hero p{color:#f0f0f0;max-width:52ch;margin:0 auto;font-size:1rem}
-@media(max-width:600px){.cat-hero{height:300px}.cat-hero .inner{padding-bottom:24px}}
+.cat-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,.2) 40%,rgba(0,0,0,.68) 100%)}
+.cat-hero .inner{position:relative;z-index:2;text-align:left;color:#fff;align-self:end;justify-self:start;padding:0 36px 32px}
+.cat-hero h1{font-size:clamp(2rem,4.4vw,3.2rem);color:#fff;margin-bottom:6px}
+.cat-hero p{color:#f2f2f2;max-width:52ch;font-size:1rem}
+@media(max-width:1392px){.cat-hero{margin-left:24px;margin-right:24px}}
+@media(max-width:600px){.cat-hero{height:240px;margin-left:16px;margin-right:16px}.cat-hero .inner{padding:0 20px 20px}}
 
 /* ---- layout ---- */
-.plp{display:grid;grid-template-columns:250px 1fr;gap:40px;padding:38px 0 80px}
+.plp{display:grid;grid-template-columns:250px minmax(0,1fr);gap:40px;padding-top:32px;padding-bottom:64px}
 @media(max-width:900px){.plp{grid-template-columns:1fr;gap:18px}}
 
 /* ---- filter sidebar ---- */
 .filters-toggle{display:none;margin-bottom:6px}
-.filters h3{font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;font-family:var(--sans);font-weight:700;color:var(--ink-soft);margin:24px 0 12px}
+.filters h3{font-size:.9rem;letter-spacing:0;font-weight:800;color:var(--ink);margin:24px 0 12px}
 .filters h3:first-child{margin-top:0}
 .filters .fgroup{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1.5px solid var(--line-strong);background:var(--surface);border-radius:9px;padding:7px 13px;font-size:.82rem;font-weight:500;color:var(--ink);transition:all .15s;cursor:pointer}
+.chip{border:1px solid var(--line-strong);background:var(--surface);border-radius:999px;min-height:38px;padding:0 15px;font-size:.86rem;font-weight:600;color:var(--ink);transition:all .15s;cursor:pointer}
 .chip:hover{border-color:var(--ink)}
 .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .size-chip{min-width:44px;text-align:center}
 .cdot{width:30px;height:30px;border-radius:50%;border:2px solid var(--line-strong);cursor:pointer;transition:transform .15s;position:relative}
 .cdot:hover{transform:scale(1.1)}
 .cdot.on{outline:2.5px solid var(--gold);outline-offset:2px}
-.cdot.on::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:.7rem;text-shadow:0 0 3px rgba(0,0,0,.6)}
+.cdot.on::after{content:"\2713";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:.7rem;text-shadow:0 0 3px rgba(0,0,0,.6)}
 .price-val{font-size:.86rem;font-weight:600;margin-bottom:10px;display:block}
 input[type=range]{width:100%;accent-color:var(--gold);cursor:pointer}
 .clear-filters{margin-top:24px;background:none;border:none;font-size:.82rem;font-weight:600;color:var(--gold);text-decoration:underline;padding:0;cursor:pointer}
@@ -47,7 +49,7 @@ input[type=range]{width:100%;accent-color:var(--gold);cursor:pointer}
 .sk-card{aspect-ratio:4/5;border-radius:var(--radius)}
 
 /* ---- PDP ---- */
-.pdp{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;padding:32px 0 80px}
+.pdp{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:54px;padding:24px 0 64px}
 @media(max-width:900px){.pdp{grid-template-columns:1fr;gap:28px}}
 .crumb{font-size:.8rem;color:var(--ink-soft);margin:18px 0 6px}
 .crumb a:hover{color:var(--gold)}
@@ -60,22 +62,22 @@ input[type=range]{width:100%;accent-color:var(--gold);cursor:pointer}
 .gal-main img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
 .gal-main.zoom img{transform:scale(2);cursor:zoom-out}
 .gal-thumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-.gal-thumbs button{width:74px;height:90px;border-radius:10px;overflow:hidden;border:2px solid transparent;padding:0;cursor:pointer;transition:border-color .15s;background:var(--raise)}
+.gal-thumbs button{width:74px;height:92px;border-radius:14px;overflow:hidden;border:2px solid transparent;padding:0;cursor:pointer;transition:border-color .15s;background:var(--raise)}
 .gal-thumbs button.on{border-color:var(--gold)}
 .gal-thumbs img{width:100%;height:100%;object-fit:cover}
 
 /* info column */
-.pdp-brand{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+.pdp-brand{font-size:.86rem;color:var(--accent);font-weight:700}
 .pdp-title{font-size:clamp(1.7rem,3.4vw,2.5rem);margin:8px 0 12px}
 .pdp-rating{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:.85rem;color:var(--ink-soft)}
 .stars{color:var(--gold);letter-spacing:2px}
 .pdp-price{display:flex;align-items:baseline;gap:12px;margin-bottom:22px}
-.pdp-price .now{font-size:1.55rem;font-weight:600}
+.pdp-price .now{font-size:1.6rem;font-weight:800}
 .pdp-price .was{font-size:1.05rem;color:var(--ink-soft);text-decoration:line-through}
-.pdp-price .off{font-size:.78rem;font-weight:700;color:#fff;background:var(--err);padding:3px 9px;border-radius:999px}
+.pdp-price .off{font-size:.8rem;font-weight:800;color:var(--sale);background:var(--sale-soft);padding:3px 9px;border-radius:999px}
 .pdp-desc{color:var(--ink-soft);margin-bottom:24px;line-height:1.75}
-.opt-label{font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--ink-soft);margin-bottom:10px}
-.opt-label b{color:var(--ink);text-transform:none;letter-spacing:0;font-weight:500;margin-left:6px}
+.opt-label{font-size:.9rem;font-weight:800;color:var(--ink);margin-bottom:10px}
+.opt-label b{color:var(--ink-soft);font-weight:500;margin-left:6px}
 .pdp-opt{margin-bottom:22px}
 .stock-line{display:flex;align-items:center;gap:8px;font-size:.85rem;margin-bottom:22px;font-weight:500}
 .stock-dot{width:9px;height:9px;border-radius:50%}
@@ -110,10 +112,10 @@ input[type=range]{width:100%;accent-color:var(--gold);cursor:pointer}
 .spec-table tr:last-child td{border-bottom:none}
 
 /* reviews */
-.reviews{padding:60px 0}
+.reviews{padding:40px 0}
 .rev-summary{display:flex;gap:40px;align-items:center;margin-bottom:34px;flex-wrap:wrap}
 .rev-big{text-align:center}
-.rev-big .num{font-family:var(--serif);font-size:3.4rem;line-height:1}
+.rev-big .num{font-size:3.2rem;font-weight:800;line-height:1}
 .rev-big .stars{font-size:1.1rem}
 .rev-big small{color:var(--ink-soft);font-size:.82rem}
 .rev-list{display:flex;flex-direction:column;gap:22px}
@@ -130,5 +132,7 @@ input[type=range]{width:100%;accent-color:var(--gold);cursor:pointer}
 
 /* ---- product type badges (Original / Exact Replica / Master Copy …) ---- */
 .pdp-quality{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 14px}
-.q-badge{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  padding:5px 11px;border-radius:999px;border:1.5px solid var(--gold);color:var(--gold);background:transparent}
+.q-badge{font-size:.78rem;font-weight:700;padding:5px 12px;border-radius:999px;color:var(--accent);background:var(--brand-soft)}
+
+/* headings above reviews / related products */
+#reviewsRoot>h2,#relatedRoot>h2{font-size:clamp(1.4rem,2.2vw,1.9rem);margin-bottom:20px}

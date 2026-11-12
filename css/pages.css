@@ -35,3 +35,12 @@
 /* faq */
 .faq-list{max-width:820px}
 .faq-cats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+
+/* about page value cards: icon in a circle, then title and text */
+.about-values .val{display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:var(--raise);border-radius:var(--radius);padding:28px 24px;text-align:left}
+.about-values .val svg{width:44px;height:44px;padding:11px;border-radius:50%;background:var(--surface);stroke:var(--accent);fill:none;stroke-width:1.9;margin-bottom:8px}
+.about-values .val b{font-size:1.05rem;font-weight:800}
+.about-values .val p{font-size:.92rem;color:var(--ink-soft)}
+/* contact rows: label and value sit directly under each other */
+.contact-item br{display:none}
+.contact-item b{font-weight:700}

@@ -70,7 +70,7 @@ function injectLink() {
   const a = document.createElement("a");
   a.id = "sizeChartLink";
   a.href = "#";
-  a.textContent = "📏 Size chart";
+  a.textContent = "Size chart";
   a.style.cssText = "margin-left:auto;font-size:.8rem;text-decoration:underline;cursor:pointer;color:var(--ink,#111)";
   a.addEventListener("click", (e) => { e.preventDefault(); document.getElementById("sizeChartDlg")?.showModal(); });
   if (label && label.classList.contains("opt-label")) {

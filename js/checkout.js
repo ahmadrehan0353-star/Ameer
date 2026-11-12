@@ -20,7 +20,7 @@ const order = { address: {}, shipping: "standard", payment: "bank_transfer" };
 
 async function boot() {
   renderNavbar(""); renderFooter();
-  products = await loadProducts();
+  products = await loadProducts({ fresh: true }); // prices and stock must be current here
 
   const cart = lsGet("lx-cart", []);
   if (!cart.length) { location.href = "cart.html"; return; }
