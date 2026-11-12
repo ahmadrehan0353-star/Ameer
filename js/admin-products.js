@@ -52,7 +52,7 @@ function renderRows() {
   document.getElementById("rows").innerHTML = list.map((p) => {
     const tags = [p.featured && "Featured", p.trending && "Trending", p.bestseller && "Best", p.isNew && "New"].filter(Boolean);
     return `<tr>
-      <td class="prod-cell"><img class="thumb" src="${esc(optimizeImg(p.image, 150))}" alt=""><b>${esc(p.name)}</b></td>
+      <td class="prod-cell"><img class="thumb" loading="lazy" decoding="async" width="44" height="54" src="${esc(optimizeImg(p.image, 150))}" data-raw="${esc(p.image || "")}" alt=""><b>${esc(p.name)}</b></td>
       <td>${esc(p.category)}<br><span class="muted" style="font-size:.78rem">${esc(p.sub || "")}</span></td>
       <td>${p.salePrice ? `<b>${money(p.salePrice)}</b> <span class="muted" style="text-decoration:line-through">${money(p.price)}</span>` : money(p.price)}</td>
       <td>${p.stock ?? 0}</td>
