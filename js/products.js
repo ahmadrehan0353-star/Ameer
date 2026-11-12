@@ -375,6 +375,7 @@ function mergeLocal(seed) {
 export function clearProductCache() {
   _cache = null;
   try { localStorage.removeItem(CATALOG_KEY); } catch {}
+  try { sessionStorage.removeItem(ADMIN_LIST_KEY); } catch {}
 }
 
 function normalize(p) {
@@ -395,13 +396,36 @@ export async function getProduct(id) {
 }
 
 // Admin-facing: every product including inactive/disabled ones (for the dashboard).
+// SPEED (admin): Dashboard, Products, Inventory, Orders and Analytics each
+// downloaded the whole product list again on every page open. The list is
+// now kept for 30 seconds per browser tab, so moving between admin pages
+// reuses it. Any product save or delete in this tab clears it at once
+// (clearProductCache), so an admin always sees their own changes.
+const ADMIN_LIST_KEY = "lx-admin-product-list";
+const ADMIN_LIST_TTL_MS = 30 * 1000;
+let _adminFetch = null;
 export async function loadAllForAdmin() {
   try {
-    const { db, collection, getDocs } = await import("./firebase.js");
-    const snap = await getDocs(collection(db, "products"));
-    if (!snap.empty) return snap.docs.map((d) => ({ id: d.id, ...d.data() })).map(normalize);
+    const raw = sessionStorage.getItem(ADMIN_LIST_KEY);
+    if (raw) {
+      const { ts, products } = JSON.parse(raw);
+      if (ts && Array.isArray(products) && Date.now() - ts < ADMIN_LIST_TTL_MS) return products;
+    }
   } catch {}
-  return mergeLocal(SEED).map(normalize);
+  if (_adminFetch) return _adminFetch; // two callers on one page share one download
+  _adminFetch = (async () => {
+    try {
+      const { db, collection, getDocs } = await import("./firebase.js");
+      const snap = await getDocs(collection(db, "products"));
+      if (!snap.empty) {
+        const list = snap.docs.map((d) => ({ id: d.id, ...d.data() })).map(normalize);
+        try { sessionStorage.setItem(ADMIN_LIST_KEY, JSON.stringify({ ts: Date.now(), products: list })); } catch {}
+        return list;
+      }
+    } catch {}
+    return mergeLocal(SEED).map(normalize);
+  })();
+  try { return await _adminFetch; } finally { _adminFetch = null; }
 }
 export { SEED as SEED_CATALOG };
 export async function byCategory(cat) {

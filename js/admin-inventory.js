@@ -41,7 +41,7 @@ function render() {
 
   document.getElementById("rows").innerHTML = list.map((p) => `
     <tr>
-      <td class="prod-cell"><img class="thumb" src="${esc(optimizeImg(p.image, 150))}" alt=""><b>${esc(p.name)}</b></td>
+      <td class="prod-cell"><img class="thumb" loading="lazy" decoding="async" width="44" height="54" src="${esc(optimizeImg(p.image, 150))}" data-raw="${esc(p.image || "")}" alt=""><b>${esc(p.name)}</b></td>
       <td>${esc(p.category)}</td>
       <td>${(p.stock ?? 0) === 0 ? `<span class="badge cancelled">Out</span>` : (p.stock ?? 0) <= 8 ? `<span class="badge pending">${p.stock} left</span>` : `<span class="badge delivered">${p.stock}</span>`}</td>
       <td><div style="display:flex;gap:8px"><input type="number" min="0" value="${p.stock ?? 0}" data-id="${esc(p.id)}" style="width:90px;padding:8px 10px;border:1.5px solid var(--line-strong);border-radius:8px;background:var(--surface);color:var(--ink)"><button class="mini-btn gold" data-save="${esc(p.id)}">Save</button></div></td>
