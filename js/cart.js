@@ -15,7 +15,7 @@ let products = [];
 
 async function boot() {
   renderNavbar(""); renderFooter();
-  products = await loadProducts();
+  products = await loadProducts({ fresh: true }); // prices and stock must be current here
   render();
 }
 
@@ -75,7 +75,7 @@ async function render() {
           const unit = p.salePrice || p.price;
           const was = p.salePrice ? `<span class="was">${money(p.price * l.qty)}</span>` : "";
           return `<div class="cart-line">
-            <a class="cimg" href="product.html?id=${esc(p.id)}"><img src="${esc(optimizeImg(p.image, 200))}" data-raw="${esc(p.image)}" alt="${esc(p.name)}" onerror="if(this.src!==this.dataset.raw){this.src=this.dataset.raw}"></a>
+            <a class="cimg" href="product.html?id=${esc(p.id)}"><img src="${esc(optimizeImg(p.image, 200))}" data-raw="${esc(p.image)}" alt="${esc(p.name)}"></a>
             <div>
               <a class="cname" href="product.html?id=${esc(p.id)}">${esc(p.name)}</a>
               <div class="cmeta">${esc(l.color)} · Size ${esc(l.size)}</div>
@@ -118,7 +118,7 @@ async function render() {
         })()}
         <a class="btn btn-primary btn-block" href="checkout.html">Checkout</a>
         <a class="btn btn-line btn-block" href="women.html" style="margin-top:10px">Continue shopping</a>
-        <div class="trust-line"><span>🔒 Secure</span><span>💵 Cash on delivery</span></div>
+        <div class="trust-line"><span>Secure checkout</span><span>Cash on delivery</span></div>
       </aside>
     </div>`;
 

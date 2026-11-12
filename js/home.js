@@ -3,43 +3,76 @@
 // ============================================================
 import { renderNavbar } from "./navbar.js";
 import { renderFooter, initReveal } from "./app.js";
-import { featured, trending, bestsellers, newArrivals, loadProducts } from "./products.js";
+import { trending, bestsellers, newArrivals } from "./products.js";
 import { renderGrid } from "./product-card.js";
-import { placeholder, optimizeImg } from "./utils.js";
+import { optimizeImg, esc, lsGet, lsSet } from "./utils.js";
 
+// Shown only until the admin has added banners in Admin › Banners.
 const SLIDES = [
-  { img: "assets/images/women-hero.jpg", eyebrow: "The New Season", title: "Quiet luxury, redefined.", text: "Discover the Women's collection — considered pieces in premium fabrics.", cta: "Shop Women", href: "women.html" },
-  { img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1600&q=80", eyebrow: "Autumn Editorial", title: "Warmth in every layer.", text: "Cashmere, wool and tailored outerwear built to last.", cta: "Shop New In", href: "index.html#new" },
-  { img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1600&q=80", eyebrow: "For Him", title: "Effortless, elevated.", text: "Menswear staples with an impeccable finish.", cta: "Shop Men", href: "men.html" }
+  { img: "assets/images/women-hero.jpg", eyebrow: "The new season", title: "Fresh lawn, ready when you are.", text: "Unstitched and ready-to-wear in fabrics that look and feel luxurious, wash after wash.", cta: "Shop women", href: "women.html" },
+  { img: "assets/images/men-hero.jpg", eyebrow: "For him", title: "Effortless, elevated.", text: "Menswear staples with an impeccable finish.", cta: "Shop men", href: "men.html" }
 ];
 
 // Fallback tiles, only used if the admin hasn't set any categories yet.
 const CATEGORY_TILES = [
   { name: "Women", subtitle: "Unstitched, stitched & more", link: "women.html", image: "assets/images/women-tile.jpg" },
-  { name: "Men", subtitle: "7 collections", link: "men.html", image: "assets/images/men-tile.jpg" },
-  { name: "Accessories", subtitle: "The finishing touch", link: "women.html?cat=Accessories", image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=600&q=80" }
+  { name: "Men", subtitle: "7 collections", link: "men.html", image: "assets/images/men-tile.jpg" }
 ];
 
 let slide = 0, timer, SLIDES_ACTIVE = SLIDES;
 
-async function boot() {
+// SPEED: banners and category tiles come from Firestore, which has to
+// download its SDK and make a round trip first. We keep the last answer in
+// localStorage, paint from it immediately, then check for changes in the
+// background and repaint only if the admin actually changed something.
+async function paintCached(key, load, paint) {
+  const saved = lsGet("lx-home:" + key, null);
+  if (saved) paint(saved);
+  let fresh = null;
+  try { fresh = await load(); } catch { /* offline or not configured */ }
+  if (fresh === null) { if (!saved) paint(null); return; }
+  if (!saved || JSON.stringify(saved) !== JSON.stringify(fresh)) paint(fresh);
+  lsSet("lx-home:" + key, fresh);
+}
+
+function boot() {
   renderNavbar("");
   renderFooter();
-  // PERFORMANCE: these three used to run one-after-another (await, await,
-  // await) even though none of them depend on each other — that stacked up
-  // three full network round trips before anything below the hero could
-  // render. Now they run together; buildHero() only needs the banner result,
-  // and buildCategoryStrip() does its own independent fetch.
-  const categoryStripDone = buildCategoryStrip();
-  await Promise.all([loadProducts(), loadBanners()]);
-  buildHero();
-  await categoryStripDone;
-  renderGrid("gridNew", (await newArrivals()).slice(0, 20));
-  renderGrid("gridTrending", (await trending()).slice(0, 16));
-  renderGrid("gridBest", (await bestsellers()).slice(0, 16));
-  initProductCarousels();
-  buildInstagram();
   initReveal();
+
+  // Each block paints as soon as its own data arrives — the banner no longer
+  // waits for the product catalog, and the product rows don't wait for it.
+  paintCached("banners", loadBanners, (slides) => { SLIDES_ACTIVE = slides && slides.length ? slides : SLIDES; buildHero(); });
+  paintCached("categories", loadCategoryTiles, (tiles) => buildCategoryStrip(tiles && tiles.length ? tiles : CATEGORY_TILES));
+
+  Promise.all([newArrivals(), trending(), bestsellers()]).then(([fresh, hot, best]) => {
+    fillRow("gridNew", fresh.slice(0, 20));
+    fillRow("gridTrending", hot.slice(0, 16));
+    fillRow("gridBest", best.slice(0, 16));
+    initProductCarousels();
+    setSideTilePhoto(fresh[0]);
+  });
+  buildInstagram();
+}
+
+// A row with nothing in it (for example no products flagged "trending" yet)
+// hides its whole section instead of showing a heading over empty space.
+function fillRow(gridId, products) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  const section = grid.closest("section");
+  if (!products.length) { if (section) section.hidden = true; return; }
+  if (section) section.hidden = false;
+  renderGrid(gridId, products);
+}
+
+// The "New In" shortcut tile shows the newest product's photo once known.
+function setSideTilePhoto(p) {
+  const img = document.getElementById("sideNewImg");
+  if (!img || !p || !p.image) return;
+  img.dataset.raw = p.image;
+  delete img.dataset.fellBack;
+  img.src = optimizeImg(p.image, 500);
 }
 
 // Wires the prev/next arrows on every ".p-carousel" (New Arrivals, Trending,
@@ -75,62 +108,53 @@ function initProductCarousels() {
   });
 }
 
-// Pull the "Shop by category" cards the admin manages in Categories;
-// fall back to the defaults if none are set or active.
-async function buildCategoryStrip() {
+// "Shop by category" cards the admin manages in Categories.
+async function loadCategoryTiles() {
+  const { listCategories } = await import("./admin-data.js");
+  return (await listCategories())
+    .filter((c) => c.active !== false && c.image)
+    .sort((a, b) => (a.order || 0) - (b.order || 0))
+    .map((c) => ({
+      name: c.name, subtitle: c.subtitle || "", link: c.link || (c.slug ? c.slug + ".html" : "#"), image: c.image
+    }));
+}
+function buildCategoryStrip(tiles) {
   const wrap = document.getElementById("catStrip");
   if (!wrap) return;
-  let tiles = CATEGORY_TILES;
-  try {
-    const { listCategories } = await import("./admin-data.js");
-    const cats = (await listCategories())
-      .filter((c) => c.active !== false && c.image)
-      .sort((a, b) => (a.order || 0) - (b.order || 0));
-    if (cats.length) {
-      tiles = cats.map((c) => ({
-        name: c.name, subtitle: c.subtitle || "", link: c.link || (c.slug ? c.slug + ".html" : "#"), image: c.image
-      }));
-    }
-  } catch { /* keep defaults */ }
   wrap.innerHTML = tiles.map((t) => `
-    <a class="cat-tile" href="${t.link}"><img loading="lazy" src="${optimizeImg(t.image, 600)}" data-raw="${t.image}" onerror="if(this.src!==this.dataset.raw){this.src=this.dataset.raw}" alt="${t.name}"><b>${t.name}<small>${t.subtitle}</small></b></a>
+    <a class="cat-tile" href="${esc(t.link)}"><img loading="lazy" decoding="async" width="600" height="750" src="${esc(optimizeImg(t.image, 600))}" data-raw="${esc(t.image)}" alt=""><b>${esc(t.name)}<small>${esc(t.subtitle)}</small></b></a>
   `).join("");
 }
 
-// Pull hero slides the admin manages in Banners; fall back to the defaults.
+// Hero slides the admin manages in Banners.
 async function loadBanners() {
-  try {
-    const { listBanners } = await import("./admin-data.js");
-    const banners = (await listBanners()).filter((b) => b.active !== false);
-    if (banners.length) {
-      SLIDES_ACTIVE = banners.map((b) => ({
-        img: b.image, eyebrow: b.subtitle || "AMEER OFFICIAL", title: b.title,
-        text: b.subtitle || "", cta: "Shop now", href: b.link || "women.html"
-      }));
-    }
-  } catch { /* keep defaults */ }
+  const { listBanners } = await import("./admin-data.js");
+  return (await listBanners()).filter((b) => b.active !== false).map((b) => ({
+    img: b.image, eyebrow: "AMEER OFFICIAL", title: b.title,
+    text: b.subtitle || "", cta: "Shop now", href: b.link || "women.html"
+  }));
 }
 
 function buildHero() {
   const wrap = document.getElementById("heroSlides");
   const dots = document.getElementById("heroDots");
-  // PERFORMANCE NOTE: previously all hero images loaded at once, at full
-  // size, competing with each other for bandwidth — even though only the
-  // first slide is ever visible on page load. That's usually the biggest
-  // single hit to how fast a homepage *feels*. Now only the first slide's
-  // image is fetched immediately (marked high priority, since it's the
-  // largest thing on screen); the rest use data-src and are swapped in
-  // shortly after, once the page has had a chance to paint.
+  if (!wrap || !dots) return;
+  slide = 0;
+  // Only the first slide's photo is fetched immediately (high priority — it is
+  // the largest thing on screen); the rest are swapped in once the page is idle.
   wrap.innerHTML = SLIDES_ACTIVE.map((s, i) => `
-    <div class="hero-slide ${i===0?'on':''}">
-      <img ${i === 0 ? `src="${optimizeImg(s.img, 1600)}" fetchpriority="high"` : `data-src="${optimizeImg(s.img, 1600)}"`} data-raw="${s.img}" onerror="if(this.src!==this.dataset.raw){this.src=this.dataset.raw}" alt="">
+    <div class="hero-slide tint-${i % 3} ${i===0?'on':''}">
       <div class="hero-content">
-        <span class="eyebrow">${s.eyebrow}</span>
-        <h1>${s.title}</h1>
-        <p>${s.text}</p>
-        <a class="btn btn-primary" href="${s.href}" style="background:#fff;color:#111">${s.cta}</a>
+        <span class="hero-pill">${esc(s.eyebrow)}</span>
+        <h1>${esc(s.title)}</h1>
+        <p>${esc(s.text)}</p>
+        <a class="btn btn-primary" href="${esc(s.href)}">${esc(s.cta)}</a>
+      </div>
+      <div class="hero-media">
+        <img ${i === 0 ? `src="${esc(optimizeImg(s.img, 1000))}" fetchpriority="high"` : `data-src="${esc(optimizeImg(s.img, 1000))}"`} data-raw="${esc(s.img)}" alt="">
       </div>
     </div>`).join("");
+  document.querySelector(".hero").classList.toggle("single", SLIDES_ACTIVE.length < 2);
   dots.innerHTML = SLIDES_ACTIVE.map((_, i) => `<button class="${i===0?'on':''}" data-i="${i}" aria-label="Slide ${i+1}"></button>`).join("");
   dots.querySelectorAll("button").forEach((b) => b.onclick = () => show(+b.dataset.i));
   document.getElementById("heroPrev").onclick = () => show(slide - 1);
@@ -147,12 +171,16 @@ function preloadRemainingSlides() {
 function show(i) {
   const slides = document.querySelectorAll(".hero-slide");
   const dots = document.querySelectorAll(".hero-dots button");
+  if (!slides.length) return;
   slide = (i + slides.length) % slides.length;
   slides.forEach((s, k) => s.classList.toggle("on", k === slide));
   dots.forEach((d, k) => d.classList.toggle("on", k === slide));
   auto();
 }
-function auto() { clearInterval(timer); timer = setInterval(() => show(slide + 1), 5500); }
+function auto() {
+  clearInterval(timer);
+  if (SLIDES_ACTIVE.length > 1) timer = setInterval(() => show(slide + 1), 6000);
+}
 
 function buildInstagram() {
   const ig = document.getElementById("igGrid");

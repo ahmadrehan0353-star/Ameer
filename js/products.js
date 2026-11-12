@@ -8,6 +8,7 @@
 import { placeholder } from "./utils.js";
 
 let _cache = null;
+let _cacheStale = false;
 
 // ---- built-in seed catalog (professional placeholder imagery via picsum) ----
 const SEED = buildSeed();
@@ -280,49 +281,77 @@ function buildSeed() {
 // after CATALOG_TTL_MS, so admin edits show up quickly without needing a
 // hard refresh.
 const CATALOG_KEY = "lx-catalog-cache";
-const CATALOG_TTL_MS = 60 * 1000; // 60s — long enough to skip repeat fetches while browsing, short enough to stay fresh
+const CATALOG_TTL_MS = 60 * 1000;        // younger than this: use as-is, no network
+const CATALOG_STALE_MS = 30 * 60 * 1000; // younger than this: show instantly, refresh in the background
 
-function readCatalogCache() {
+// SPEED: the catalog used to be kept for 60 seconds in sessionStorage, so
+// the first page of every visit (and any page after a minute's pause) sat
+// on skeletons until Firebase had loaded and answered. It now lives in
+// localStorage and is served "stale while revalidating": a returning
+// shopper sees products immediately from the last copy while a fresh copy
+// is fetched quietly for the next page. Cart and checkout pass
+// { fresh: true } so prices and stock there are never older than 60s.
+function readCatalogCache(maxAge) {
   try {
-    const raw = sessionStorage.getItem(CATALOG_KEY);
+    const raw = localStorage.getItem(CATALOG_KEY);
     if (!raw) return null;
     const { ts, products } = JSON.parse(raw);
-    if (!ts || Date.now() - ts > CATALOG_TTL_MS) return null;
-    return products;
+    if (!ts || !Array.isArray(products) || Date.now() - ts > maxAge) return null;
+    return { products, age: Date.now() - ts };
   } catch { return null; }
 }
 function writeCatalogCache(products) {
-  try { sessionStorage.setItem(CATALOG_KEY, JSON.stringify({ ts: Date.now(), products })); }
+  try { localStorage.setItem(CATALOG_KEY, JSON.stringify({ ts: Date.now(), products })); }
   catch { /* storage full or unavailable — safe to skip caching */ }
 }
 
-export async function loadProducts() {
-  if (_cache) return _cache;
+let _liveFetch = null;
+function fetchLive() {
+  if (_liveFetch) return _liveFetch;
+  _liveFetch = (async () => {
+    const { db, collection, getDocs } = await import("./firebase.js");
+    const snap = await getDocs(collection(db, "products"));
+    if (snap.empty) return null;
+    const live = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      .filter((p) => p.active !== false)
+      .map(normalize);
+    writeCatalogCache(live);
+    return live;
+  })();
+  _liveFetch.finally(() => { _liveFetch = null; }).catch(() => {});
+  return _liveFetch;
+}
 
-  const cached = readCatalogCache();
+export async function loadProducts({ fresh = false } = {}) {
+  if (_cache && !(fresh && _cacheStale)) return _cache;
+
+  const cached = readCatalogCache(fresh ? CATALOG_TTL_MS : CATALOG_STALE_MS);
   if (cached) {
-    _cache = cached;
+    _cache = cached.products;
+    _cacheStale = cached.age > CATALOG_TTL_MS;
+    if (_cacheStale) fetchLive().catch(() => {}); // refresh for the next page view
     wireSearch();
     return _cache;
   }
 
   try {
-    const { db, collection, getDocs } = await import("./firebase.js");
-    const snap = await getDocs(collection(db, "products"));
-    if (!snap.empty) {
-      const live = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-        .filter((p) => p.active !== false)
-        .map(normalize);
+    const live = await fetchLive();
+    if (live) {
       _cache = live;
-      writeCatalogCache(live);
+      _cacheStale = false;
       wireSearch();
       return live;
     }
   } catch (e) {
+    // Network hiccup on a page that wanted fresh data: an older copy of the
+    // real catalog is still far better than the built-in demo one.
+    const older = readCatalogCache(CATALOG_STALE_MS);
+    if (older) { _cache = older.products; _cacheStale = true; wireSearch(); return _cache; }
     // Firebase not configured yet — fall through to seed + local admin edits.
     console.info("AMEER OFFICIAL: using local catalog (Firebase not configured yet).");
   }
   _cache = mergeLocal(SEED).filter((p) => p.active !== false).map(normalize);
+  _cacheStale = false;
   wireSearch();
   return _cache;
 }
@@ -343,7 +372,10 @@ function mergeLocal(seed) {
 }
 
 // let the admin invalidate the public-site cache after edits
-export function clearProductCache() { _cache = null; }
+export function clearProductCache() {
+  _cache = null;
+  try { localStorage.removeItem(CATALOG_KEY); } catch {}
+}
 
 function normalize(p) {
   const images = p.images && p.images.length ? p.images : [p.image || placeholder(p.id)];

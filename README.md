@@ -42,6 +42,17 @@ See **CONNECT-GUIDE.md** for the full Firebase + Cloudinary + Vercel walkthrough
 and **STEP4-ADMIN-GUIDE.md** for what each admin page does.
 
 ## Design
-Minimal luxury — white canvas, black type, gold accent (#b8985a), Playfair
-Display + Inter, rounded cards, dark mode, scroll-reveal animations, fully
-responsive and accessible (skip links, focus rings, reduced-motion, high-contrast).
+"Bright boutique" — white canvas, deep-teal accent (#0b5d5b), soft peach and
+mint panels, Plus Jakarta Sans (self-hosted in `assets/fonts`), pill buttons,
+rounded cards, a large search bar and category chips, dark mode, fully
+responsive and accessible (skip links, focus rings, reduced-motion).
+
+Storefront pages load `css/site.css` plus one page stylesheet. The admin panel
+still uses `css/style.css` + `css/admin.css` and has not been restyled yet.
+
+## Product photos
+Photos in `assets/images` have small WebP copies next to them
+(`photo.jpg.w500.webp`, `photo.jpg.w1000.webp`) that the storefront uses
+automatically, falling back to the original. After adding photos to that
+folder run `python3 tools/make-image-variants.py`. Photos uploaded through
+the admin panel go to Cloudinary and need nothing extra.

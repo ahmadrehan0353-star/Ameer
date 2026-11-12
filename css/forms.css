@@ -15,7 +15,7 @@
 .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
 
 /* account / profile */
-.acct{display:grid;grid-template-columns:240px 1fr;gap:40px;padding:40px 0 80px}
+.acct{display:grid;grid-template-columns:240px minmax(0,1fr);gap:40px;padding-top:32px;padding-bottom:64px}
 @media(max-width:820px){.acct{grid-template-columns:1fr;gap:22px}}
 .acct-nav{display:flex;flex-direction:column;gap:2px;align-self:start;position:sticky;top:96px}
 @media(max-width:820px){.acct-nav{position:static;flex-direction:row;flex-wrap:wrap;gap:8px}}
