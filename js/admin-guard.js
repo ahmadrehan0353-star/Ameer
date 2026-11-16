@@ -4,7 +4,7 @@
 // a local admin session (set on the admin login page) is used.
 // ============================================================
 import { currentUser, logOut } from "./auth.js";
-import { esc, lsGet } from "./utils.js";
+import { esc, lsGet, lsSet } from "./utils.js";
 import { initTheme, toggleTheme } from "./utils.js";
 import { usingFirebase } from "./admin-data.js";
 import { isAdminEmail } from "./admin-team.js";
@@ -12,6 +12,28 @@ import { isAdminEmail } from "./admin-team.js";
 // Returns the signed-in admin, or redirects to admin login.
 export async function requireAdmin() {
   initTheme();
+
+  // SPEED: every admin page used to stay blank until Firebase had loaded,
+  // restored the sign-in and (for invited admins) checked the team list.
+  // If this browser was let in before, draw the sidebar and header now and
+  // do the same checks underneath. Nothing private is shown early — only
+  // the menu — and a failed check still redirects to the login page.
+  const hint = lsGet(ADMIN_HINT_KEY, null);
+  const shellEl = document.getElementById("adminShell");
+  if (hint && shellEl && !shellEl.firstChild) {
+    const slug = (location.pathname.split("/").pop() || "").replace(".html", "");
+    const body = renderAdminShell(NAV.some(([s]) => s === slug) ? slug : "", { email: hint });
+    body.innerHTML = `<p class="muted" style="padding:8px 2px">Loading…</p>`;
+  }
+  const user = await checkAdmin();
+  if (user && user.email) lsSet(ADMIN_HINT_KEY, user.email);
+  else lsSet(ADMIN_HINT_KEY, null);
+  return user;
+}
+
+const ADMIN_HINT_KEY = "lx-admin-hint";
+
+async function checkAdmin() {
 
   // local demo admin session
   if (!(await usingFirebase())) {
@@ -161,4 +183,4 @@ export function renderAdminShell(active, user) {
 }
 
 export function setAdminSession(email) { localStorage.setItem("lx-admin-session", JSON.stringify(email)); }
-export function clearAdminSession() { localStorage.removeItem("lx-admin-session"); }
+export function clearAdminSession() { localStorage.removeItem("lx-admin-session"); localStorage.removeItem(ADMIN_HINT_KEY); }

@@ -85,9 +85,17 @@ export async function isAdminEmail(email) {
 
   const f = await fb();
   if (f) {
+    // SPEED: an invited admin's status was looked up in Firestore on every
+    // page open. A "yes" is now remembered for 5 minutes in this tab. (This
+    // is still only UI gating — the Firestore rules do the real check on
+    // every read and write.)
+    const key = "lx-admin-ok:" + e;
+    try { if (Date.now() - Number(sessionStorage.getItem(key) || 0) < 5 * 60 * 1000) return true; } catch {}
     try {
       const snap = await f.getDoc(f.doc(f.db, "admins", e));
-      return snap.exists() && snap.data().status === "active";
+      const ok = snap.exists() && snap.data().status === "active";
+      try { ok ? sessionStorage.setItem(key, String(Date.now())) : sessionStorage.removeItem(key); } catch {}
+      return ok;
     } catch { return false; }
   }
   const t = localTeam()[e];

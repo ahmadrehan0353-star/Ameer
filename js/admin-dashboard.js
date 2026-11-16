@@ -3,12 +3,17 @@ import { adminListProducts, adminListOrders, adminListCustomers } from "./admin-
 import { money, esc, optimizeImg } from "./utils.js";
 
 (async function () {
+  // SPEED: the three downloads start now, alongside the sign-in check,
+  // instead of after it. If they were refused because the sign-in wasn't
+  // restored yet, they are simply asked for again below.
+  const load = () => Promise.all([adminListProducts(), adminListOrders(), adminListCustomers()]);
+  const early = load().catch(() => null);
+
   const user = await requireAdmin(); if (!user) return;
   const body = renderAdminShell("dashboard", user);
+  body.innerHTML = `<p class="muted" style="padding:8px 2px">Loading…</p>`;
 
-  const [products, orders, customers] = await Promise.all([
-    adminListProducts(), adminListOrders(), adminListCustomers()
-  ]);
+  const [products, orders, customers] = (await early) || (await load());
 
   // Revenue only counts orders that have actually been delivered — a
   // "pending" or "cancelled" order isn't money in the bank yet, so it
@@ -80,7 +85,7 @@ import { money, esc, optimizeImg } from "./utils.js";
       <h2>Low stock alerts</h2>
       <table class="ad-table"><thead><tr><th>Product</th><th>Category</th><th>Stock</th><th></th></tr></thead>
       <tbody>${[...outStock, ...lowStock].slice(0, 8).map((p) => `
-        <tr><td class="prod-cell"><img class="thumb" src="${esc(optimizeImg(p.image, 150))}" alt=""><b>${esc(p.name)}</b></td>
+        <tr><td class="prod-cell"><img class="thumb" loading="lazy" decoding="async" width="44" height="54" src="${esc(optimizeImg(p.image, 150))}" data-raw="${esc(p.image || "")}" alt=""><b>${esc(p.name)}</b></td>
         <td>${esc(p.category)}</td>
         <td><span class="badge ${(p.stock ?? 0) === 0 ? "cancelled" : "pending"}">${(p.stock ?? 0) === 0 ? "Out of stock" : p.stock + " left"}</span></td>
         <td><a href="products.html" class="mini-btn">Manage</a></td></tr>`).join("") || `<tr class="empty-row"><td colspan="4">All products well stocked ✓</td></tr>`}

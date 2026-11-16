@@ -223,12 +223,21 @@ export const deleteBanner = (id) => delCol("banners", "lx-admin-banners", id, BA
 /* =====================================================================
    ORDERS — read all, update status
    ===================================================================== */
+// SPEED: the dashboard asked for all orders twice at the same moment (once
+// directly, once inside adminListCustomers). Calls that overlap now share
+// one download. Nothing is kept afterwards, so every new call is live data.
+let _ordersFetch = null;
 export async function adminListOrders() {
   const f = await fb();
   if (f) {
-    const snap = await f.getDocs(f.collection(f.db, "orders"));
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    if (!_ordersFetch) {
+      _ordersFetch = f.getDocs(f.collection(f.db, "orders"))
+        .then((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+      const clear = () => { _ordersFetch = null; };
+      _ordersFetch.then(clear, clear);
+    }
+    return (await _ordersFetch).map((o) => ({ ...o }));
   }
   // local: gather every lx-orders:* bucket + demo orders
   const out = [];
@@ -275,10 +284,10 @@ const DEMO_ORDERS = [
 export async function adminListCustomers() {
   const f = await fb();
   if (f) {
-    const snap = await f.getDocs(f.collection(f.db, "users"));
+    // customers and orders download side by side instead of one after the other
+    const [snap, orders] = await Promise.all([f.getDocs(f.collection(f.db, "users")), adminListOrders()]);
     const users = snap.docs.map((d) => ({ uid: d.id, ...d.data(), orders: 0, spent: 0 }));
     // fold in order counts & spend
-    const orders = await adminListOrders();
     orders.forEach((o) => {
       const u = users.find((x) => x.uid === o.uid || x.email === o.email);
       if (u) { u.orders += 1; u.spent += o.totals?.total || 0; }
@@ -372,6 +381,7 @@ export async function publishCatalogToFirestore() {
     await f.setDoc(f.doc(f.db, "products", p.id), { ...p, updatedAt: f.serverTimestamp() }, { merge: true });
     count++;
   }
+  clearProductCache();
   return count;
 }
 // True when Cloudinary hasn't been set up yet (any placeholder/empty value).
